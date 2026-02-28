@@ -6,6 +6,7 @@ void setup() {
 
     Bridge.begin();
     Bridge.provide("set_led_state", set_led_state);
+    Bridge.provide("press_key", press_key);
 }
 
 void loop() {}
@@ -13,4 +14,8 @@ void loop() {}
 void set_led_state(bool state) {
     // LOW = on, HIGH = off
     digitalWrite(LED_BUILTIN, state ? LOW : HIGH);
+}
+
+void press_key(double to_press) {
+    // TODO: do something
 }

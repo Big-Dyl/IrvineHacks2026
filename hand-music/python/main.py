@@ -54,10 +54,8 @@ def activated_key(prev_frame, this_frame):
     return -1
 
 def press_key(to_unpress, to_press):
-    # TODO: unpress prev frame in hardware
-    # TODO: is to_unpress necessary from hardware?
-    # TODO: press this frame in hardware
-    Bridge.call('press_key', to_press)
+    # TODO: unpress prev key and press new key in hardware
+    Bridge.call('press_key', to_unpress, to_press)
 
 def loop():
     global keyboard_state

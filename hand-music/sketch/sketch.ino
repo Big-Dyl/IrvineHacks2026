@@ -16,6 +16,6 @@ void set_led_state(bool state) {
     digitalWrite(LED_BUILTIN, state ? LOW : HIGH);
 }
 
-void press_key(double to_press) {
-    // TODO: do something
+void press_key(int to_unpress, int to_press) {
+    // TODO: release the key at to_unpress and press the key at to_press
 }

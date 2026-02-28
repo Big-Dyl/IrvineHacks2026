@@ -38,7 +38,7 @@ keyboard_state = {
 
 def led_blink():
     global led_is_on
-    time.sleep(1)
+    time.sleep(0.50)
     led_is_on = not led_is_on
     Bridge.call('set_led_state', led_is_on)
     print("led blinking")

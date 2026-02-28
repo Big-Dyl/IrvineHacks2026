@@ -1,0 +1,6 @@
+name: Hand Music
+description: Play music from afar
+ports: []
+bricks:
+- arduino:web_ui: {}
+icon: 👋

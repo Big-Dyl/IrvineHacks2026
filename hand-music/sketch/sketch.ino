@@ -26,11 +26,11 @@ void setServoAngle(uint8_t channel, float angle) {
   pwm.setPWM(channel, 0, pwm_val);
 }
 
-void press_key(unint8_t key){
-    for(unit8_t key = 0; key < NUM_SERVOS; ++key){
+void press_key(int key){
+    for(unit8_t k = 0; k < NUM_SERVOS; ++k){
         setServoAngle(0, 0);
     }
-    setServoAngle(0, 90);
+    setServoAngle(key, 90);
 }
 
 void loop() {}

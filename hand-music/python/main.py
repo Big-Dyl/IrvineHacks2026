@@ -27,11 +27,11 @@ def call_model(frame):
     # TODO: outsource to model rather than dummy data
     # NOTE: dummy data is based on a left hand
     example_res = {
-        'thumb_tip': [31, 90],
-        'index_finger_tip': [72, 57],
-        'middle_finger_tip': [108, 56],
-        'ring_finger_tip': [138, 83],
-        'pinky_tip': [155, 142]
+        'thumb_tip': [31, 90, 0],
+        'index_finger_tip': [72, 57, 30],
+        'middle_finger_tip': [108, 56, 0],
+        'ring_finger_tip': [138, 83, 0],
+        'pinky_tip': [155, 142, 0]
     }
     return example_res
 
@@ -40,6 +40,7 @@ def find_keys_pressed(frame):
     # TODO: use the Edge Impulse ML
     locations = call_model(frame)
     # Figure out whether finger is down based on the highest finger
+    """
     top_finger_y = 0
     for v in locations.values():
         top_finger_y = max(top_finger_y, v[1])
@@ -55,10 +56,16 @@ def find_keys_pressed(frame):
         else:
             if v[1] < top_finger_y - 200:
                 pressed_finger_coordinates.append(v);
+    """
+    pressed_finger_coordinates = []
+    for v in locations.values():
+        z_pos = v[2]
+        if z_pos > 10:
+            pressed_finger_coordinates.append(v)
 
-    # Imagine there are 7 white keys on screen; we partition them
+    # Imagine there are 8 white keys on screen; we partition them
     # OR, determine the key width based on the average distance from the finger tips?
-    key_width = 192 / 7
+    key_width = 192 / 8
 
     return [False, True, False, False, True, False, False]
 

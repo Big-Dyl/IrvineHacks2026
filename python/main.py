@@ -9,11 +9,17 @@ from edge_impulse_linux.image import ImageImpulseRunner
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("camera_no", default=0, type=int)
+# parser.add_argument("camera_no", default=0, type=int)
 parser.add_argument("-s", "--show", action="store_true")
+args = parser.parse_args()
 
-cap = cv2.VideoCapture(args.camera_no)
-mdl = ImageImpulseRunner("/home/arduino/hand_landmark_detector.eim")
+cap = cv2.VideoCapture(0)
+import urllib.request
+import os
+fname, _headers = urllib.request.urlretrieve("https://raw.githubusercontent.com/Big-Dyl/IrvineHacks2026/refs/heads/main/hand_landmark_detector_uno.eim") 
+os.chmod(fname, os.stat(fname).st_mode | 0o111)
+
+mdl = ImageImpulseRunner(fname)
 # mdl._allow_shm = False
 mdl.init()
 
@@ -94,7 +100,7 @@ def press_key(to_press):
 
 def loop():
     global keyboard_state
-    global cap
+    # global cap
 
     time.sleep(0.50)
     led_blink()
@@ -130,5 +136,5 @@ try:
     App.run(user_loop=loop)
 finally:
     cap.release()
-    cv2.destroyAllWindows()
+
 

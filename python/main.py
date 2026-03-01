@@ -1,9 +1,6 @@
 from arduino.app_utils import *
 import time
 
-"""
-import airlib
-
 import cv2
 from PIL import Image
 import numpy as np
@@ -15,10 +12,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("camera_no", default=0, type=int)
 parser.add_argument("-s", "--show", action="store_true")
 
-#cap = cv2.VideoCapture(args.camera_no)
-#mdl = ImageImpulseRunner("/home/arduino/hand_landmark_detector.eim")
+cap = cv2.VideoCapture(args.camera_no)
+mdl = ImageImpulseRunner("/home/arduino/hand_landmark_detector.eim")
 # mdl._allow_shm = False
-#mdl.init()
+mdl.init()
 
 if not cap.isOpened():
     print("ERROR: failed to open camera 0")
@@ -36,6 +33,31 @@ def led_blink():
     led_is_on = not led_is_on
     Bridge.call('set_led_state', led_is_on)
 
+
+LANDMARK_NAMES = [
+    "WRIST",
+    "THUMB_CMC", "THUMB_MCP", "THUMB_IP", "THUMB_TIP",
+    "INDEX_MCP", "INDEX_PIP", "INDEX_DIP", "INDEX_TIP",
+    "MIDDLE_MCP", "MIDDLE_PIP", "MIDDLE_DIP", "MIDDLE_TIP",
+    "RING_MCP", "RING_PIP", "RING_DIP", "RING_TIP",
+    "PINKY_MCP", "PINKY_PIP", "PINKY_DIP", "PINKY_TIP",
+]
+
+
+def parse_landmarks(output_63: np.ndarray):
+    """
+    Convert flat [63] array of interleaved x,y,z values into
+    a list of 21 (px, py, z) tuples.
+    x and y are normalized [0,1] -> scaled to image pixels.
+    z is depth relative to wrist (not scaled).
+    """
+    coords = output_63.reshape(21, 3)  # shape (21, 3)
+    landmarks = []
+    for x, y, z in coords:
+        landmarks.append((x, y, float(z)))
+    return landmarks
+
+
 def call_model(frame):
     global mdl
 
@@ -44,14 +66,14 @@ def call_model(frame):
     got_back = mdl.classify(feats)
     landmarks, hand_presence, handedness, world_landmarks = got_back["result"]["freeform"]
 
-    landmarks = airlib.parse_landmarks(np.array(landmarks))
+    landmarks = parse_landmarks(np.array(landmarks))
     # see airlib.LANDMARK_NAMES
     return landmarks
 
 def find_keys_pressed(frame):
     # Model returns x, y, z of each tip 0 to 192
     locations = call_model(frame)
-    locations_zipped = {l: loc for l, loc in zip(locations, airlib.LANDMARK_NAMES)}
+    locations_zipped = {l: loc for l, loc in zip(locations, LANDMARK_NAMES)}
     # Figure out whether finger is down based on the highest finger
     pressed_finger_coordinates = []
     for k, v in locations_zipped:
@@ -101,7 +123,6 @@ def loop():
 
     keyboard_state['keys_down'] = this_frame
     keyboard_state['active_key'] = new_active_key
-"""
 
 def press_key(to_press):
     Bridge.call('press_key', to_press)
@@ -142,7 +163,6 @@ try:
     # Start the application
     App.run(user_loop=dummy_loop)
 finally:
-    #cap.release()
-    #cv2.destroyAllWindows()
-    pass
+    cap.release()
+    cv2.destroyAllWindows()
 

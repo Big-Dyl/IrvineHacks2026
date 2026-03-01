@@ -52,9 +52,9 @@ def activated_key(prev_frame, this_frame):
             return i
     return -1
 
-def press_key(to_unpress, to_press):
-    # TODO: unpress prev key and press new key in hardware
-    Bridge.call('press_key', to_unpress, to_press)
+def press_key(to_press):
+    # TODO: press new key in hardware
+    Bridge.call('press_key', to_press)
 
 def loop():
     global keyboard_state
@@ -65,7 +65,7 @@ def loop():
     this_frame = find_keys_pressed()
     new_active_key = activated_key(keyboard_state['keys_down'], this_frame)
     if new_active_key != keyboard_state['active_key']:
-        press_key(keyboard_state['active_key'], new_active_key)
+        press_key(new_active_key)
 
     keyboard_state['keys_down'] = this_frame
     keyboard_state['active_key'] = new_active_key

@@ -20,7 +20,7 @@ void press_key(int key){
     for(uint8_t k = 0; k < NUM_SERVOS; ++k){
         setServoAngle(k, 0);
     }
-    setServoAngle(key, 90);
+    setServoAngle(key, 27);
 }
 
 void setup() {

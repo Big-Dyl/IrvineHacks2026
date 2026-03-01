@@ -41,25 +41,6 @@ def find_keys_pressed(frame):
     # TODO: use the Edge Impulse ML
     locations = call_model(frame)
     # Figure out whether finger is down based on the highest finger
-    """
-    top_finger_y = 0
-    for v in locations.values():
-        top_finger_y = max(top_finger_y, v[1])
-    index_finger_mcp_y = locations['index_finger_mcp_y']
-
-    # TODO: improve logic
-    # TODO: use z index instead
-    pressed_finger_coordinates = []
-    for k, v in locations.items():
-        # TODO: determine whether this finger is pressed
-        if k == 'thumb_tip':
-            # Calc thumb differently
-            if v[1] < index_finger_mcp_y - 200:
-                pressed_finger_coordinates.append(v);
-        else:
-            if v[1] < top_finger_y - 200:
-                pressed_finger_coordinates.append(v);
-    """
     pressed_finger_coordinates = []
     for v in locations.values():
         z_pos = v[2]

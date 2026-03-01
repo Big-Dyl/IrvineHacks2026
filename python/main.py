@@ -1,7 +1,7 @@
 from arduino.app_utils import *
-from arduino.app_peripherals.camera import Camera, BaseCamera
 import time
 
+import cv2
 from PIL import Image
 import numpy as np
 from edge_impulse_linux.image import ImageImpulseRunner
@@ -9,17 +9,16 @@ from edge_impulse_linux.image import ImageImpulseRunner
 import argparse
 
 parser = argparse.ArgumentParser()
+parser.add_argument("camera_no", default=0, type=int)
+parser.add_argument("-s", "--show", action="store_true")
 
-camera = Camera()
-try:
-    camera.start()
-except Exception as e:
-    print("can't start camera")
-    print(e)
-
+cap = cv2.VideoCapture(args.camera_no)
 mdl = ImageImpulseRunner("/home/arduino/hand_landmark_detector.eim")
 # mdl._allow_shm = False
 mdl.init()
+
+if not cap.isOpened():
+    print("ERROR: failed to open camera 0")
 
 led_is_on = False
 
@@ -95,15 +94,17 @@ def press_key(to_press):
 
 def loop():
     global keyboard_state
-    global camera
+    global cap
 
     time.sleep(0.50)
     led_blink()
 
     # Read from camera
-    frame = self._camera.capture()
-    if frame is None:
-        time.sleep(0.01)  # Brief sleep if no image available
+    if not cap:
+        # Cannot proceed
+        return
+    ret, frame = cap.read()
+    if not ret:
         return
 
     this_frame = find_keys_pressed(frame)

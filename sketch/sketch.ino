@@ -15,6 +15,10 @@ void setServoAngle(uint8_t channel, float angle) {
   pwm.setPWM(channel, 0, pwm_val);
 }
 
+void set_led_state(bool state) {
+    digitalWrite(LED_BUILTIN, state ? LOW : HIGH);
+}
+
 void press_key(int key) {
   for (uint8_t k = 0; k < NUM_SERVOS; ++k) {
     setServoAngle(k, 0);
@@ -31,6 +35,7 @@ void setup() {
   pwm.setPWMFreq(SERVO_FREQ);
   Bridge.begin();
   Bridge.provide("press_key", press_key);
+  Bridge.provide("set_led_state", set_led_state);
 }
 
 void loop() {}

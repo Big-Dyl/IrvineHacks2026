@@ -27,11 +27,12 @@ def call_model(frame):
     # TODO: outsource to model rather than dummy data
     # NOTE: dummy data is based on a left hand
     example_res = {
-        'thumb_tip': [31, 90, 0],
-        'index_finger_tip': [72, 57, 30],
-        'middle_finger_tip': [108, 56, 0],
-        'ring_finger_tip': [138, 83, 0],
-        'pinky_tip': [155, 142, 0]
+        'thumb_tip': [31, 90],
+        'index_finger_tip': [72, 57],
+        'middle_finger_tip': [108, 56],
+        'ring_finger_tip': [138, 83],
+        'pinky_tip': [155, 142]
+        'index_finger_mcp': [64, 90],
     }
     return example_res
 
@@ -44,14 +45,16 @@ def find_keys_pressed(frame):
     top_finger_y = 0
     for v in locations.values():
         top_finger_y = max(top_finger_y, v[1])
+    index_finger_mcp_y = locations['index_finger_mcp_y']
 
     # TODO: improve logic
+    # TODO: use z index instead
     pressed_finger_coordinates = []
     for k, v in locations.items():
         # TODO: determine whether this finger is pressed
         if k == 'thumb_tip':
             # Calc thumb differently
-            if v[1] < top_finger_y - 200:
+            if v[1] < index_finger_mcp_y - 200:
                 pressed_finger_coordinates.append(v);
         else:
             if v[1] < top_finger_y - 200:
@@ -67,10 +70,17 @@ def find_keys_pressed(frame):
     # OR, determine the key width based on the average distance from the finger tips?
     key_width = 192 / 8
 
-    return [False, True, False, False, True, False, False]
+    # Depending on the pressed finger coordinates, press the corresponding keys
+    pressed = [False] * 8
+
+    for coord in pressed_finger_coordinates:
+        key_number = max(0, min(7, coord[0] // key_width))
+        pressed[key_number] = True
+
+    return pressed
 
 def activated_key(prev_frame, this_frame):
-    for i in range(0, 7):
+    for i in range(0, 8):
         if i < len(this_frame) and i < len(prev_frame) and this_frame[i] and not prev_frame[i]:
             return i
     return -1

@@ -47,7 +47,7 @@ def find_keys_pressed(frame):
         if z_pos > 10:
             pressed_finger_coordinates.append(v)
 
-    # Imagine there are 8 white keys on screen; we partition them
+    # Imagine there are several white keys on screen; we partition them
     # OR, determine the key width based on the average distance from the finger tips?
     key_width = 192 / 8
 

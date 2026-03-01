@@ -1,36 +1,34 @@
-#include <Arduino_RouterBridge.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-#define NUM_SERVOS 16
-#define SERVOMIN  150   // Min pulse length (0 degrees)
-#define SERVOMAX  600   // Max pulse length (180 degrees)
-#define SERVO_FREQ 50   // 50 Hz for analog servos
+#define SERVOMIN 150   // Adjust if needed
+#define SERVOMAX 600   // Adjust if needed
+#define SERVO_FREQ 50  // 50Hz for analog servos
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("HELLO!!");
+  Serial.println("Servo sanity test");
+
   pwm.begin();
   pwm.setOscillatorFrequency(27000000);
   pwm.setPWMFreq(SERVO_FREQ);
-  Bridge.provide("press_key", press_key);
+
+  delay(1000);
 }
 
 void setServoAngle(uint8_t channel, float angle) {
+  channel *= 2;
   angle = constrain(angle, 0, 180);
-
-  uint16_t pwm_val = SERVOMIN + 
-                     (angle / 180.0) * (SERVOMAX - SERVOMIN);
+  uint16_t pwm_val = map(angle, 0, 180, SERVOMIN, SERVOMAX);
   pwm.setPWM(channel, 0, pwm_val);
 }
 
-void press_key(int key){
-    for(unit8_t k = 0; k < NUM_SERVOS; ++k){
-        setServoAngle(0, 0);
-    }
-    setServoAngle(key, 90);
+void loop() {
+  setServoAngle(0, 30);
+  delay(1000);
+  setServoAngle(0, 90);
+  delay(1000);
+  setServoAngle(0, 180);
 }
-
-void loop() {}

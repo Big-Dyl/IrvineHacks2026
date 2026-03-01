@@ -1,8 +1,6 @@
 
 """
 SSD Anchor generation for MediaPipe palm detection.
-Translated from:
-  mediapipe/calculators/tflite/ssd_anchors_calculator.cc
 
 Palm detection config (192x192 input, 2016 anchors):
   - strides: [8, 8, 16, 16]  (two layers at each stride, merged per same-stride logic)
@@ -57,13 +55,6 @@ def calculate_scale(min_scale: float, max_scale: float,
 
 
 def generate_anchors(options: SsdAnchorsOptions) -> list[Anchor]:
-    """
-    Main anchor generation — mirrors SsdAnchorsCalculator::GenerateAnchors().
-
-    Layers sharing the same stride are merged: their aspect ratios and scales
-    are accumulated before iterating over the feature map grid, so you get
-    multiple anchors per spatial cell.
-    """
     anchors: list[Anchor] = []
     num_layers = options.num_layers
 
@@ -175,7 +166,6 @@ if __name__ == "__main__":
 
     print(f"Total anchors generated: {len(anchors)}")
     assert len(anchors) == 2016, f"Expected 2016, got {len(anchors)}"
-    print("✓ Anchor count matches expected 2016\n")
 
     # Breakdown
     stride8_cells  = math.ceil(192 / 8)  ** 2   # 24x24 = 576

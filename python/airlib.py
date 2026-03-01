@@ -4,13 +4,13 @@ from PIL import Image
 
 import anchorlib
 
-interpreter_detect = Interpreter(model_path="palm_detection_full.tflite")
+interpreter_detect = Interpreter(model_path="../palm_detection_full.tflite")
 interpreter_detect.allocate_tensors()
 
 input_details_detect = interpreter_detect.get_input_details()
 output_details_detect = interpreter_detect.get_output_details()
 
-interpreter_landmark = Interpreter(model_path="hand_landmark_full.tflite")
+interpreter_landmark = Interpreter(model_path="../hand_landmark_full.tflite")
 interpreter_landmark.allocate_tensors()
 
 input_details_landmark = interpreter_landmark.get_input_details()

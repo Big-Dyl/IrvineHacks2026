@@ -1,8 +1,6 @@
 from arduino.app_utils import *
 import time
 
-import airlib
-
 import cv2
 from PIL import Image
 import numpy as np

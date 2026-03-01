@@ -1,6 +1,5 @@
 # this is for the arduino
 
-opencv-python
 numpy
 edge_impulse_linux
 Pillow

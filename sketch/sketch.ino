@@ -24,7 +24,7 @@ void press_key(int key) {
     setServoAngle(k, 0);
   }
 
-  setServoAngle(key, key % 2 == 0 ? 27 : 90);
+  setServoAngle(key, key % 2 == 0 ? 27 : 60);
 }
 
 void setup() {

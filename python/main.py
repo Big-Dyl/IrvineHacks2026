@@ -1,6 +1,9 @@
 from arduino.app_utils import *
 import time
 
+"""
+import airlib
+
 import cv2
 from PIL import Image
 import numpy as np
@@ -9,19 +12,13 @@ from edge_impulse_linux.image import ImageImpulseRunner
 import argparse
 
 parser = argparse.ArgumentParser()
-# parser.add_argument("camera_no", default=0, type=int)
+parser.add_argument("camera_no", default=0, type=int)
 parser.add_argument("-s", "--show", action="store_true")
-args = parser.parse_args()
 
-cap = cv2.VideoCapture(0)
-import urllib.request
-import os
-fname, _headers = urllib.request.urlretrieve("https://raw.githubusercontent.com/Big-Dyl/IrvineHacks2026/refs/heads/main/hand_landmark_detector_uno.eim") 
-os.chmod(fname, os.stat(fname).st_mode | 0o111)
-
-mdl = ImageImpulseRunner(fname)
+#cap = cv2.VideoCapture(args.camera_no)
+#mdl = ImageImpulseRunner("/home/arduino/hand_landmark_detector.eim")
 # mdl._allow_shm = False
-mdl.init()
+#mdl.init()
 
 if not cap.isOpened():
     print("ERROR: failed to open camera 0")
@@ -39,19 +36,6 @@ def led_blink():
     led_is_on = not led_is_on
     Bridge.call('set_led_state', led_is_on)
 
-def parse_landmarks(output_63: np.ndarray):
-    """
-    Convert flat [63] array of interleaved x,y,z values into
-    a list of 21 (px, py, z) tuples.
-    x and y are normalized [0,1] -> scaled to image pixels.
-    z is depth relative to wrist (not scaled).
-    """
-    coords = output_63.reshape(21, 3)  # shape (21, 3)
-    landmarks = []
-    for x, y, z in coords:
-        landmarks.append((x, y, float(z)))
-    return landmarks
-
 def call_model(frame):
     global mdl
 
@@ -60,7 +44,7 @@ def call_model(frame):
     got_back = mdl.classify(feats)
     landmarks, hand_presence, handedness, world_landmarks = got_back["result"]["freeform"]
 
-    landmarks = parse_landmarks(np.array(landmarks))
+    landmarks = airlib.parse_landmarks(np.array(landmarks))
     # see airlib.LANDMARK_NAMES
     return landmarks
 
@@ -95,12 +79,9 @@ def activated_key(prev_frame, this_frame):
             return i
     return -1
 
-def press_key(to_press):
-    Bridge.call('press_key', to_press)
-
 def loop():
     global keyboard_state
-    # global cap
+    global cap
 
     time.sleep(0.50)
     led_blink()
@@ -120,21 +101,48 @@ def loop():
 
     keyboard_state['keys_down'] = this_frame
     keyboard_state['active_key'] = new_active_key
+"""
+
+def press_key(to_press):
+    Bridge.call('press_key', to_press)
 
 def dummy_loop():
-    press_key(0)
-    time.sleep(1)
-    press_key(1)
-    time.sleep(1)
     press_key(2)
-    time.sleep(1)
+    time.sleep(0.430)
+    press_key(2)
+    time.sleep(0.430)
     press_key(3)
+    time.sleep(0.430)
+    press_key(4)
+    time.sleep(0.430)
+    press_key(4)
+    time.sleep(0.430)
+    press_key(3)
+    time.sleep(0.430)
+    press_key(2)
+    time.sleep(0.430)
+    press_key(1)
+    time.sleep(0.430)
+    press_key(0)
+    time.sleep(0.430)
+    press_key(0)
+    time.sleep(0.430)
+    press_key(1)
+    time.sleep(0.430)
+    press_key(2)
+    time.sleep(0.430)
+    press_key(2)
+    time.sleep(0.645)
+    press_key(0)
+    time.sleep(0.215)
+    press_key(0)
     time.sleep(1)
 
 try:
     # Start the application
-    App.run(user_loop=loop)
+    App.run(user_loop=dummy_loop)
 finally:
-    cap.release()
-
+    #cap.release()
+    #cv2.destroyAllWindows()
+    pass
 

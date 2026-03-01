@@ -1,6 +1,15 @@
 from arduino.app_utils import *
 import time
 
+import cv2
+
+# Default camera
+# TODO: when to release capture?
+cap = cv2.VideoCapture(0)
+
+if not cap.isOpened():
+    print("ERROR: failed to open camera 0")
+
 led_is_on = False
 
 keyboard_state = {
@@ -8,68 +17,93 @@ keyboard_state = {
     'active_key': -1
 }
 
-#def get_led_status():
-#    """Get current LED status for API."""
-#    return {
-#        "led_is_on": led_is_on,
-#        "status_text": "LED IS ON" if led_is_on else "LED IS OFF"
-#    }
-
-#def toggle_led_state(client, data):
-#    """Toggle the LED state when receiving socket message."""
-#    global led_is_on
-#    led_is_on = not led_is_on
-
-    # Call a function in the sketch, using the Bridge helper library, to control the state of the LED connected to the microcontroller.
-    # This performs a RPC call and allows the Python code and the Sketch code to communicate.
-#    Bridge.call("set_led_state", led_is_on)
-
-    # Send updated status to all connected clients
-    #ui.send_message('led_status_update', get_led_status())
-
-#def on_get_initial_state(client, data):
-#    """Handle client request for initial LED state."""
-#    #ui.send_message('led_status_update', get_led_status(), client)
-#    pass
-
-# Handle socket messages (like in Code Scanner example)
-#ui.on_message('toggle_led', toggle_led_state)
-#ui.on_message('get_initial_state', on_get_initial_state)
-
+# For demo/visibility purposes
 def led_blink():
     global led_is_on
-    time.sleep(1)
     led_is_on = not led_is_on
     Bridge.call('set_led_state', led_is_on)
-    print("led blinking")
 
-def find_keys_pressed():
+def call_model(frame):
+    # TODO: outsource to model rather than dummy data
+    # NOTE: dummy data is based on a left hand
+    example_res = {
+        'thumb_tip': [31, 90],
+        'index_finger_tip': [72, 57],
+        'middle_finger_tip': [108, 56],
+        'ring_finger_tip': [138, 83],
+        'pinky_tip': [155, 142]
+    }
+    return example_res
+
+def find_keys_pressed(frame):
+    # Model returns x, y, z of each tip 0 to 192
     # TODO: use the Edge Impulse ML
-    return [False, True, False, False, True, True, False, True, False, True, False, False, False, False]
+    locations = call_model(frame)
+    # Figure out whether finger is down based on the highest finger
+    top_finger_y = 0
+    for v in locations.values():
+        top_finger_y = max(top_finger_y, v[1])
+
+    # TODO: improve logic
+    pressed_finger_coordinates = []
+    for k, v in locations.items():
+        # TODO: determine whether this finger is pressed
+        if k == 'thumb_tip':
+            # Calc thumb differently
+            if v[1] < top_finger_y - 200:
+                pressed_finger_coordinates.append(v);
+        else:
+            if v[1] < top_finger_y - 200:
+                pressed_finger_coordinates.append(v);
+
+    # Imagine there are 7 white keys on screen; we partition them
+    # OR, determine the key width based on the average distance from the finger tips?
+    key_width = 192 / 7
+
+    return [False, True, False, False, True, False, False]
 
 def activated_key(prev_frame, this_frame):
-    for i in range(0, 14):
+    for i in range(0, 7):
         if i < len(this_frame) and i < len(prev_frame) and this_frame[i] and not prev_frame[i]:
             return i
     return -1
 
-def press_key(to_unpress, to_press):
-    # TODO: unpress prev frame in hardware
-    # TODO: is to_unpress necessary from hardware?
-    # TODO: press this frame in hardware
+def press_key(to_press):
+    # TODO: press new key in hardware
     Bridge.call('press_key', to_press)
 
 def loop():
     global keyboard_state
+    global cap
+
+    time.sleep(0.50)
     led_blink()
 
-    this_frame = find_keys_pressed()
+    # Read from camera
+    if not cap:
+        # Cannot proceed
+        return
+    ret, frame = cap.read()
+    if not ret:
+        return
+
+    this_frame = find_keys_pressed(frame)
     new_active_key = activated_key(keyboard_state['keys_down'], this_frame)
     if new_active_key != keyboard_state['active_key']:
-        press_key(keyboard_state['active_key'], new_active_key)
+        press_key(new_active_key)
 
     keyboard_state['keys_down'] = this_frame
     keyboard_state['active_key'] = new_active_key
 
+def dummy_loop():
+    press_key(0)
+    time.sleep(1)
+    press_key(1)
+    time.sleep(1)
+    press_key(2)
+    time.sleep(1)
+    press_key(3)
+    time.sleep(1)
+
 # Start the application
-App.run(user_loop=loop)
+App.run(user_loop=dummy_loop)

@@ -1,6 +1,15 @@
 from arduino.app_utils import *
 import time
 
+import cv2
+
+# Default camera
+# TODO: when to release capture?
+cap = cv2.VideoCapture(0)
+
+if not cap.isOpened():
+    print("ERROR: failed to open camera 0")
+
 led_is_on = False
 
 keyboard_state = {
@@ -14,7 +23,7 @@ def led_blink():
     led_is_on = not led_is_on
     Bridge.call('set_led_state', led_is_on)
 
-def call_model():
+def call_model(frame):
     # TODO: outsource to model rather than dummy data
     # NOTE: dummy data is based on a left hand
     example_res = {
@@ -26,10 +35,10 @@ def call_model():
     }
     return example_res
 
-def find_keys_pressed():
+def find_keys_pressed(frame):
     # Model returns x, y, z of each tip 0 to 192
     # TODO: use the Edge Impulse ML
-    locations = call_model()
+    locations = call_model(frame)
     # Figure out whether finger is down based on the highest finger
     top_finger_y = 0
     for v in locations.values():
@@ -58,11 +67,20 @@ def press_key(to_press):
 
 def loop():
     global keyboard_state
+    global cap
 
     time.sleep(0.50)
     led_blink()
 
-    this_frame = find_keys_pressed()
+    # Read from camera
+    if not cap:
+        # Cannot proceed
+        return
+    ret, frame = cap.read()
+    if not ret:
+        return
+
+    this_frame = find_keys_pressed(frame)
     new_active_key = activated_key(keyboard_state['keys_down'], this_frame)
     if new_active_key != keyboard_state['active_key']:
         press_key(new_active_key)

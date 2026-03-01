@@ -44,10 +44,17 @@ def find_keys_pressed(frame):
     for v in locations.values():
         top_finger_y = max(top_finger_y, v[1])
 
-    # TOOD: improve logic
+    # TODO: improve logic
     pressed_finger_coordinates = []
     for k, v in locations.items():
-        k
+        # TODO: determine whether this finger is pressed
+        if k == 'thumb_tip':
+            # Calc thumb differently
+            if v[1] < top_finger_y - 200:
+                pressed_finger_coordinates.append(v);
+        else:
+            if v[1] < top_finger_y - 200:
+                pressed_finger_coordinates.append(v);
 
     # Imagine there are 7 white keys on screen; we partition them
     # OR, determine the key width based on the average distance from the finger tips?

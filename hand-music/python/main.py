@@ -27,11 +27,12 @@ def call_model(frame):
     # TODO: outsource to model rather than dummy data
     # NOTE: dummy data is based on a left hand
     example_res = {
-        'thumb_tip': [31, 90],
-        'index_finger_tip': [72, 57],
-        'middle_finger_tip': [108, 56],
-        'ring_finger_tip': [138, 83],
-        'pinky_tip': [155, 142]
+        'thumb_tip': [31, 90, 0],
+        'index_finger_tip': [72, 57, 0],
+        'middle_finger_tip': [108, 56, 0],
+        'ring_finger_tip': [138, 83, 0],
+        'pinky_tip': [155, 142, 0],
+        'index_finger_mcp': [64, 90, 20],
     }
     return example_res
 
@@ -40,30 +41,27 @@ def find_keys_pressed(frame):
     # TODO: use the Edge Impulse ML
     locations = call_model(frame)
     # Figure out whether finger is down based on the highest finger
-    top_finger_y = 0
-    for v in locations.values():
-        top_finger_y = max(top_finger_y, v[1])
-
-    # TODO: improve logic
     pressed_finger_coordinates = []
-    for k, v in locations.items():
-        # TODO: determine whether this finger is pressed
-        if k == 'thumb_tip':
-            # Calc thumb differently
-            if v[1] < top_finger_y - 200:
-                pressed_finger_coordinates.append(v);
-        else:
-            if v[1] < top_finger_y - 200:
-                pressed_finger_coordinates.append(v);
+    for v in locations.values():
+        z_pos = v[2]
+        if z_pos > 10:
+            pressed_finger_coordinates.append(v)
 
-    # Imagine there are 7 white keys on screen; we partition them
+    # Imagine there are several white keys on screen; we partition them
     # OR, determine the key width based on the average distance from the finger tips?
-    key_width = 192 / 7
+    key_width = 192 / 8
 
-    return [False, True, False, False, True, False, False]
+    # Depending on the pressed finger coordinates, press the corresponding keys
+    pressed = [False] * 8
+
+    for coord in pressed_finger_coordinates:
+        key_number = max(0, min(7, coord[0] // key_width))
+        pressed[key_number] = True
+
+    return pressed
 
 def activated_key(prev_frame, this_frame):
-    for i in range(0, 7):
+    for i in range(0, 8):
         if i < len(this_frame) and i < len(prev_frame) and this_frame[i] and not prev_frame[i]:
             return i
     return -1

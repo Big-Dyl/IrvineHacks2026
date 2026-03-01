@@ -19,6 +19,6 @@ Connect to the UNO Q over the network.
 Install the Arduino App Lab
 
 To run the project through the App Lab:
-- Zip the `hand-music` file
+- Zip the `hand-music` folder
 - Import that to App Lab
 - Press Run

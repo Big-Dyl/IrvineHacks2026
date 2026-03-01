@@ -27,12 +27,12 @@ def call_model(frame):
     # TODO: outsource to model rather than dummy data
     # NOTE: dummy data is based on a left hand
     example_res = {
-        'thumb_tip': [31, 90],
-        'index_finger_tip': [72, 57],
-        'middle_finger_tip': [108, 56],
-        'ring_finger_tip': [138, 83],
-        'pinky_tip': [155, 142]
-        'index_finger_mcp': [64, 90],
+        'thumb_tip': [31, 90, 0],
+        'index_finger_tip': [72, 57, 0],
+        'middle_finger_tip': [108, 56, 0],
+        'ring_finger_tip': [138, 83, 0],
+        'pinky_tip': [155, 142, 0]
+        'index_finger_mcp': [64, 90, 20],
     }
     return example_res
 

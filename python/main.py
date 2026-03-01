@@ -1,11 +1,23 @@
 from arduino.app_utils import *
 import time
 
-import cv2
+import airlib
 
-# Default camera
-# TODO: when to release capture?
-cap = cv2.VideoCapture(0)
+import cv2
+from PIL import Image
+import numpy as np
+from edge_impulse_linux.image import ImageImpulseRunner
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("camera_no", default=0, type=int)
+parser.add_argument("-s", "--show", action="store_true")
+
+cap = cv2.VideoCapture(args.camera_no)
+mdl = ImageImpulseRunner("/home/arduino/hand_landmark_detector.eim")
+# mdl._allow_shm = False
+mdl.init()
 
 if not cap.isOpened():
     print("ERROR: failed to open camera 0")
@@ -24,28 +36,28 @@ def led_blink():
     Bridge.call('set_led_state', led_is_on)
 
 def call_model(frame):
-    # TODO: outsource to model rather than dummy data
-    # NOTE: dummy data is based on a left hand
-    example_res = {
-        'thumb_tip': [31, 90, 0],
-        'index_finger_tip': [72, 57, 0],
-        'middle_finger_tip': [108, 56, 0],
-        'ring_finger_tip': [138, 83, 0],
-        'pinky_tip': [155, 142, 0],
-        'index_finger_mcp': [64, 90, 20],
-    }
-    return example_res
+    global mdl
+
+    img = Image.fromarray(frame).resize((224, 224))
+    feats, crop = mdl.get_features_from_image(np.array(img))
+    got_back = mdl.classify(feats)
+    landmarks, hand_presence, handedness, world_landmarks = got_back["result"]["freeform"]
+
+    landmarks = airlib.parse_landmarks(np.array(landmarks))
+    # see airlib.LANDMARK_NAMES
+    return landmarks
 
 def find_keys_pressed(frame):
     # Model returns x, y, z of each tip 0 to 192
-    # TODO: use the Edge Impulse ML
     locations = call_model(frame)
+    locations_zipped = {l: loc for l, loc in zip(locations, airlib.LANDMARK_NAMES)}
     # Figure out whether finger is down based on the highest finger
     pressed_finger_coordinates = []
-    for v in locations.values():
-        z_pos = v[2]
-        if z_pos > 10:
-            pressed_finger_coordinates.append(v)
+    for k, v in locations_zipped:
+        if k.endswith("_TIP"):
+            z_pos = v[2]
+            if z_pos > 10:
+                pressed_finger_coordinates.append(v)
 
     # Imagine there are several white keys on screen; we partition them
     # OR, determine the key width based on the average distance from the finger tips?
@@ -67,7 +79,6 @@ def activated_key(prev_frame, this_frame):
     return -1
 
 def press_key(to_press):
-    # TODO: press new key in hardware
     Bridge.call('press_key', to_press)
 
 def loop():
@@ -103,5 +114,10 @@ def dummy_loop():
     press_key(3)
     time.sleep(1)
 
-# Start the application
-App.run(user_loop=dummy_loop)
+try:
+    # Start the application
+    App.run(user_loop=loop)
+finally:
+    cap.release()
+    cv2.destroyAllWindows()
+

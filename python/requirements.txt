@@ -1,1 +1,6 @@
+# this is for the arduino
+
 opencv
+numpy
+edge_impulse_linux
+Pillow

@@ -33,7 +33,4 @@ void setup() {
   Bridge.provide("press_key", press_key);
 }
 
-
-
-
 void loop() {}

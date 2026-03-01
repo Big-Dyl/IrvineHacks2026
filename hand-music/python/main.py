@@ -95,5 +95,15 @@ def loop():
     keyboard_state['keys_down'] = this_frame
     keyboard_state['active_key'] = new_active_key
 
+def dummy_loop():
+    press_key(0)
+    time.sleep(1)
+    press_key(1)
+    time.sleep(1)
+    press_key(2)
+    time.sleep(1)
+    press_key(3)
+    time.sleep(1)
+
 # Start the application
-App.run(user_loop=loop)
+App.run(user_loop=dummy_loop)

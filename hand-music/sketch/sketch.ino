@@ -11,7 +11,6 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 void setServoAngle(uint8_t channel, float angle) {
   angle = constrain(angle, 0, 180);
-  channel *= 2;
   uint16_t pwm_val = SERVOMIN + 
                      (angle / 180.0) * (SERVOMAX - SERVOMIN);
   pwm.setPWM(channel, 0, pwm_val);
@@ -19,7 +18,7 @@ void setServoAngle(uint8_t channel, float angle) {
 
 void press_key(int key){
     for(uint8_t k = 0; k < NUM_SERVOS; ++k){
-        setServoAngle(0, 0);
+        setServoAngle(k, 0);
     }
     setServoAngle(key, 90);
 }

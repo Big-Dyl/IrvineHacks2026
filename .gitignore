@@ -1,2 +1,5 @@
 # Zips for importing
 hand-music.zip
+
+.ipynb_checkpoints/
+__pycache__/

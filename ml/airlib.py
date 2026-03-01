@@ -127,3 +127,67 @@ def landmark(image):
     world_landmarks = interpreter_landmark.get_tensor(output_details_landmark[3]['index'])[0]
 
     return landmarks, hand_presence, handedness, world_landmarks
+
+import numpy as np
+import cv2
+
+# ── Landmark connections (finger skeletons) ──────────────────────────────────
+HAND_CONNECTIONS = [
+    # Thumb
+    (0, 1), (1, 2), (2, 3), (3, 4),
+    # Index
+    (0, 5), (5, 6), (6, 7), (7, 8),
+    # Middle
+    (0, 9), (9, 10), (10, 11), (11, 12),
+    # Ring
+    (0, 13), (13, 14), (14, 15), (15, 16),
+    # Pinky
+    (0, 17), (17, 18), (18, 19), (19, 20),
+    # Palm
+    (5, 9), (9, 13), (13, 17),
+]
+
+LANDMARK_NAMES = [
+    "WRIST",
+    "THUMB_CMC", "THUMB_MCP", "THUMB_IP", "THUMB_TIP",
+    "INDEX_MCP", "INDEX_PIP", "INDEX_DIP", "INDEX_TIP",
+    "MIDDLE_MCP", "MIDDLE_PIP", "MIDDLE_DIP", "MIDDLE_TIP",
+    "RING_MCP", "RING_PIP", "RING_DIP", "RING_TIP",
+    "PINKY_MCP", "PINKY_PIP", "PINKY_DIP", "PINKY_TIP",
+]
+
+
+def draw_landmarks(image: np.ndarray, landmarks: list, draw_labels: bool = True):
+    """
+    Draw hand skeleton and landmark points over image (in-place).
+    """
+    img = image.copy()
+    h, w = img.shape[:2]
+
+    # Draw connections
+    for (a, b) in HAND_CONNECTIONS:
+        x1, y1, _ = landmarks[a]
+        x1 = int(x1)
+        y1 = int(y1)
+        x2, y2, _ = landmarks[b]
+        x2 = int(x2)
+        y2 = int(y2)
+        cv2.line(img, (x1, y1), (x2, y2), color=(0, 200, 0), thickness=2)
+
+    # Draw landmark dots and labels
+    for i, (px, py, z) in enumerate(landmarks):
+        px = int(px)
+        py = int(py)
+        # Fingertips (indices 4,8,12,16,20) get a larger dot
+        is_tip = i in (4, 8, 12, 16, 20)
+        radius = 6 if is_tip else 4
+        color = (0, 0, 255) if is_tip else (255, 0, 0)
+        cv2.circle(img, (px, py), radius, color, -1)
+        cv2.circle(img, (px, py), radius, (255, 255, 255), 1)  # white outline
+
+        if draw_labels:
+            label = f"{i}"  # just the index; swap for LANDMARK_NAMES[i] if you want full names
+            cv2.putText(img, label, (px + 6, py - 6),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
+
+    return img

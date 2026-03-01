@@ -35,6 +35,19 @@ def led_blink():
     led_is_on = not led_is_on
     Bridge.call('set_led_state', led_is_on)
 
+def parse_landmarks(output_63: np.ndarray):
+    """
+    Convert flat [63] array of interleaved x,y,z values into
+    a list of 21 (px, py, z) tuples.
+    x and y are normalized [0,1] -> scaled to image pixels.
+    z is depth relative to wrist (not scaled).
+    """
+    coords = output_63.reshape(21, 3)  # shape (21, 3)
+    landmarks = []
+    for x, y, z in coords:
+        landmarks.append((x, y, float(z)))
+    return landmarks
+
 def call_model(frame):
     global mdl
 
@@ -43,7 +56,7 @@ def call_model(frame):
     got_back = mdl.classify(feats)
     landmarks, hand_presence, handedness, world_landmarks = got_back["result"]["freeform"]
 
-    landmarks = airlib.parse_landmarks(np.array(landmarks))
+    landmarks = parse_landmarks(np.array(landmarks))
     # see airlib.LANDMARK_NAMES
     return landmarks
 

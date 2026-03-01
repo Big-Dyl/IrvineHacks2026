@@ -31,7 +31,7 @@ def call_model(frame):
         'index_finger_tip': [72, 57, 0],
         'middle_finger_tip': [108, 56, 0],
         'ring_finger_tip': [138, 83, 0],
-        'pinky_tip': [155, 142, 0]
+        'pinky_tip': [155, 142, 0],
         'index_finger_mcp': [64, 90, 20],
     }
     return example_res

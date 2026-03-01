@@ -98,6 +98,20 @@ def detect(image):
 
     best_conf, box, keypoints = decode_best_palm_detection(output_0, output_1)
     return best_conf, box, keypoints
+
+def parse_landmarks(output_63: np.ndarray):
+    """
+    Convert flat [63] array of interleaved x,y,z values into
+    a list of 21 (px, py, z) tuples.
+    x and y are normalized [0,1] -> scaled to image pixels.
+    z is depth relative to wrist (not scaled).
+    """
+    coords = output_63.reshape(21, 3)  # shape (21, 3)
+    landmarks = []
+    for x, y, z in coords:
+        landmarks.append((x, y, float(z)))
+    return landmarks
+
 def landmark(image):
     image = image.copy().resize((224, 224)).convert("RGB")
     image_np = np.array(image, dtype=np.uint8)
@@ -132,6 +146,16 @@ HAND_CONNECTIONS = [
     # Palm
     (5, 9), (9, 13), (13, 17),
 ]
+
+LANDMARK_NAMES = [
+    "WRIST",
+    "THUMB_CMC", "THUMB_MCP", "THUMB_IP", "THUMB_TIP",
+    "INDEX_MCP", "INDEX_PIP", "INDEX_DIP", "INDEX_TIP",
+    "MIDDLE_MCP", "MIDDLE_PIP", "MIDDLE_DIP", "MIDDLE_TIP",
+    "RING_MCP", "RING_PIP", "RING_DIP", "RING_TIP",
+    "PINKY_MCP", "PINKY_PIP", "PINKY_DIP", "PINKY_TIP",
+]
+
 
 def draw_landmarks(image: np.ndarray, landmarks: list, draw_labels: bool = True):
     """

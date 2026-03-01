@@ -1,0 +1,4 @@
+https://storage.googleapis.com/mediapipe-assets/palm_detection_lite.tflite
+https://storage.googleapis.com/mediapipe-assets/palm_detection_full.tflite
+https://storage.googleapis.com/mediapipe-assets/hand_landmark_lite.tflite
+https://storage.googleapis.com/mediapipe-assets/hand_landmark_full.tflite

@@ -1,0 +1,6 @@
+# this is for the arduino
+
+opencv-python-headless
+numpy
+edge_impulse_linux
+Pillow

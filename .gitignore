@@ -3,3 +3,7 @@ hand-music.zip
 
 .ipynb_checkpoints/
 __pycache__/
+
+# arduino-side stuff
+.cache/
+
